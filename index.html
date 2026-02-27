@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pete Quinn</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700;900&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0e0f13; --surface: #16181f; --surface2: #1e2029;
+    --accent: #c8a96e; --accent2: #7eb8a4; --text: #e8e6e1;
+    --muted: #8a8880; --border: #2a2c35;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; line-height: 1.7; font-size: 16px; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 48px;
+    background: rgba(14,15,19,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--accent); letter-spacing: 0.02em; }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+
+  .hero { min-height: 100vh; display: flex; align-items: center; padding: 120px 48px 80px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -200px; right: -100px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(200,169,110,0.08) 0%, transparent 70%); pointer-events: none; }
+  .hero::after { content: ''; position: absolute; bottom: -100px; left: 200px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(126,184,164,0.06) 0%, transparent 70%); pointer-events: none; }
+  .hero-inner { max-width: 860px; }
+  .hero-tag { display: inline-block; font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; border: 1px solid rgba(200,169,110,0.3); padding: 6px 14px; border-radius: 2px; }
+  .hero-name-row { display: flex; align-items: center; gap: 28px; margin-bottom: 28px; flex-wrap: wrap; }
+  .avatar { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--accent); flex-shrink: 0; overflow: hidden; filter: grayscale(100%); }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 7vw, 5.5rem); line-height: 1.05; font-weight: 900; color: var(--text); margin: 0; }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub { font-size: 1.15rem; color: var(--muted); max-width: 600px; line-height: 1.8; margin-bottom: 40px; font-weight: 300; }
+  .hero-sub strong { color: var(--text); font-weight: 500; }
+  .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn { padding: 14px 28px; border-radius: 2px; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+  .btn-primary { background: var(--accent); color: #0e0f13; font-weight: 600; }
+  .btn-primary:hover { background: #d9bc85; }
+  .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  section { padding: 100px 48px; }
+  .section-label { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 700; margin-bottom: 48px; line-height: 1.2; }
+  .max-w { max-width: 1100px; margin: 0 auto; }
+
+  #about { background: var(--surface); }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .about-text p { color: var(--muted); margin-bottom: 20px; font-weight: 300; font-size: 1.05rem; }
+  .about-text p strong { color: var(--text); font-weight: 500; }
+  .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .stat-card { background: var(--surface2); border: 1px solid var(--border); padding: 28px 24px; border-radius: 4px; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--accent); font-weight: 700; }
+  .stat-label { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.06em; margin-top: 4px; text-transform: uppercase; }
+
+  #journey { background: var(--bg); }
+  .map-toggle { display: flex; gap: 0; margin-bottom: 28px; border: 1px solid var(--border); border-radius: 2px; overflow: hidden; width: fit-content; }
+  .map-toggle-btn { padding: 10px 24px; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; background: transparent; color: var(--muted); border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+  .map-toggle-btn.active { background: var(--accent); color: #0e0f13; font-weight: 600; }
+  .map-toggle-btn:not(.active):hover { color: var(--text); }
+  #map { height: 440px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 48px; position: relative; z-index: 1; }
+  .leaflet-container { background: #1a1c23 !important; }
+  .leaflet-tile { filter: brightness(0.5) saturate(0.3) hue-rotate(180deg); }
+  .leaflet-popup-content-wrapper { background: var(--surface2) !important; border: 1px solid var(--border) !important; border-radius: 4px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important; color: var(--text) !important; }
+  .leaflet-popup-tip { background: var(--surface2) !important; }
+  .leaflet-popup-content { margin: 16px 18px !important; }
+  .popup-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+  .popup-label.pro { color: var(--accent); }
+  .popup-label.personal { color: var(--accent2); }
+  .popup-title { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--text); margin-bottom: 6px; }
+  .popup-note { font-size: 0.82rem; color: var(--muted); line-height: 1.5; font-weight: 300; }
+
+  .timeline { position: relative; padding-left: 32px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 1px; background: var(--border); }
+  .tl-item { position: relative; margin-bottom: 40px; }
+  .tl-dot { position: absolute; left: -28px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+  .tl-dot.teal { background: var(--accent2); }
+  .tl-year { font-size: 0.75rem; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
+  .tl-place { font-size: 1.05rem; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .tl-desc { font-size: 0.9rem; color: var(--muted); font-weight: 300; }
+
+  #experience { background: var(--surface); }
+  .exp-list { display: flex; flex-direction: column; gap: 32px; }
+  .exp-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 36px; transition: border-color 0.2s; }
+  .exp-card:hover { border-color: rgba(200,169,110,0.3); }
+  .exp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+  .exp-title { font-size: 1.1rem; font-weight: 600; color: var(--text); }
+  .exp-period { font-size: 0.8rem; color: var(--accent); letter-spacing: 0.06em; }
+  .exp-company { font-size: 0.9rem; color: var(--accent2); margin-bottom: 16px; font-weight: 500; letter-spacing: 0.03em; }
+  .exp-bullets { list-style: none; }
+  .exp-bullets li { font-size: 0.9rem; color: var(--muted); padding: 6px 0; padding-left: 16px; position: relative; font-weight: 300; }
+  .exp-bullets li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-size: 0.75rem; }
+
+  #books { background: var(--bg); }
+  .books-intro { color: var(--muted); font-size: 1.05rem; max-width: 640px; margin-bottom: 48px; font-weight: 300; }
+  .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+  .book-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 28px; transition: border-color 0.2s; }
+  .book-card:hover { border-color: rgba(126,184,164,0.4); }
+  .book-tag { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent2); margin-bottom: 10px; }
+  .book-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--text); margin-bottom: 4px; }
+  .book-author { font-size: 0.8rem; color: var(--muted); margin-bottom: 12px; }
+  .book-note { font-size: 0.88rem; color: var(--muted); font-weight: 300; line-height: 1.6; font-style: italic; }
+
+  #skills { background: var(--surface); }
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+  .skill-pill { background: var(--surface2); border: 1px solid var(--border); padding: 14px 20px; border-radius: 2px; font-size: 0.85rem; color: var(--muted); letter-spacing: 0.04em; transition: all 0.2s; }
+  .skill-pill:hover { border-color: var(--accent); color: var(--text); }
+
+  #contact { background: var(--bg); text-align: center; }
+  #contact .section-title { margin-bottom: 16px; }
+  .contact-sub { color: var(--muted); margin-bottom: 40px; max-width: 480px; margin-left: auto; margin-right: auto; }
+  .contact-links { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  footer { text-align: center; padding: 32px; font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--border); }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .nav-links { gap: 20px; }
+    .hero, section { padding-left: 24px; padding-right: 24px; }
+    .about-grid { grid-template-columns: 1fr; gap: 48px; }
+    .exp-header { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">PQ</div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#journey">Journey</a>
+    <a href="#experience">Experience</a>
+    <a href="#books">Reading</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">Finance · Strategy · Analysis</div>
+    <div class="hero-name-row">
+      <div class="avatar">
+        <img src="https://raw.githubusercontent.com/petermquinn/pquinn-site/main/Screenshot%202026-02-26%20at%2011.03.59%20PM.png" alt="Pete Quinn"/>
+      </div>
+      <h1>Pete<br><span>Quinn.</span></h1>
+    </div>
+    <p class="hero-sub">
+      I turn messy data into decisions people actually trust. <strong>FP&A analyst</strong> with a background spanning SaaS, commercial banking, and post-merger integration — I build the financial infrastructure that helps companies understand where they are and where they're going.
+    </p>
+    <div class="hero-ctas">
+      <a href="#experience" class="btn btn-primary">View My Work</a>
+      <a href="#contact" class="btn btn-outline">Get In Touch</a>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="max-w">
+    <div class="section-label">About Me</div>
+    <div class="section-title">Not your typical<br>finance person.</div>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>I grew up in <strong>Newton, MA</strong> and spent my summers in Brewster on the Cape — where I picked up my first jobs, learned to work hard early, and developed a healthy respect for 4-year-olds (more on that later). I made my way to Madison, Wisconsin for four years of business school and genuinely cold winters, then came back to Boston and built a career in FP&A.</p>
+        <p>My work is the kind that rarely gets a headline but tends to matter a lot: the model that changes how leadership thinks about a product line, the board deck that actually gets read, the methodology that makes two companies' data finally speak the same language.</p>
+        <p>Outside of spreadsheets, I'm usually skiing, running, or thinking about the intersection of <strong>psychology and decision-making</strong> — which, it turns out, is pretty useful in finance too.</p>
+      </div>
+      <div class="about-stats">
+        <div class="stat-card"><div class="stat-num">5+</div><div class="stat-label">Years in FP&A</div></div>
+        <div class="stat-card"><div class="stat-num">BBA</div><div class="stat-label">UW–Madison, 2020</div></div>
+        <div class="stat-card"><div class="stat-num">2</div><div class="stat-label">Industries: SaaS & Banking</div></div>
+        <div class="stat-card"><div class="stat-num">↑</div><div class="stat-label">Always Building Something</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="journey">
+  <div class="max-w">
+    <div class="section-label">The Journey</div>
+    <div class="section-title">Where I've been<br>shapes how I think.</div>
+    <div class="map-toggle">
+      <button class="map-toggle-btn active" onclick="showLayer('professional', this)">Professional</button>
+      <button class="map-toggle-btn" onclick="showLayer('personal', this)">Personal</button>
+    </div>
+    <div id="map"></div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-year">1997 – 2016</div>
+        <div class="tl-place">Newton, MA</div>
+        <div class="tl-desc">Grew up here. Summers in Brewster on the Cape — first jobs, hard work, and the beginning of a complicated relationship with 4-year-olds.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot teal"></div>
+        <div class="tl-year">2016 – 2020</div>
+        <div class="tl-place">Madison, WI — University of Wisconsin</div>
+        <div class="tl-desc">BBA in Finance, Investment & Banking with a minor in Environmental Studies. GPA 3.58. Learned to love cold weather, great lakes, and building analytical frameworks from scratch.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-year">2020 – 2024</div>
+        <div class="tl-place">Boston, MA — Santander Bank</div>
+        <div class="tl-desc">Started in a Finance Rotational Program across four divisions. Landed in Commercial Banking Finance as a Senior Analyst.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot teal"></div>
+        <div class="tl-year">2024 – Present</div>
+        <div class="tl-place">Remote — Autura</div>
+        <div class="tl-desc">Senior FP&A Analyst at a SaaS company post-merger. Leading board reporting, building revenue models from scratch, standardizing financial methodology across five business segments.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="max-w">
+    <div class="section-label">Experience</div>
+    <div class="section-title">The work.</div>
+    <div class="exp-list">
+      <div class="exp-card">
+        <div class="exp-header">
+          <div class="exp-title">Senior FP&A Analyst</div>
+          <div class="exp-period">Aug 2024 – Present</div>
+        </div>
+        <div class="exp-company">Autura · Remote</div>
+        <ul class="exp-bullets">
+          <li>Lead financial reporting across five business segments for 2,000+ customers, delivering monthly revenue and ARR insights to sales and customer operations</li>
+          <li>Drive board reporting process end-to-end — coordinating five departments, synthesizing financial analysis, and meeting hard submission deadlines</li>
+          <li>Built customer churn models, rolling ARR forecasts, and product contribution margin frameworks to support strategic and compensation planning</li>
+          <li>Constructed segment-specific revenue models across software, auctions, and payments to identify growth levers and cyclical trends</li>
+        </ul>
+      </div>
+      <div class="exp-card">
+        <div class="exp-header">
+          <div class="exp-title">Senior Analyst – Commercial Banking Finance</div>
+          <div class="exp-period">Jun 2022 – Aug 2024</div>
+        </div>
+        <div class="exp-company">Santander Bank, N.A. · Boston, MA</div>
+        <ul class="exp-bullets">
+          <li>Built a monthly loan balance report tracking new and departing commercial clients, variance by customer and segment, and budget comparison for executive review</li>
+          <li>Developed deal profitability reporting across four commercial segments, analyzing ROE, RORWA, pricing, and balance trends to shape new business strategy</li>
+          <li>Tracked risk-weighted asset consumption across the commercial portfolio to forecast strategic exits and generate relationship manager insights</li>
+        </ul>
+      </div>
+      <div class="exp-card">
+        <div class="exp-header">
+          <div class="exp-title">Financial Analyst — Finance Rotational Program</div>
+          <div class="exp-period">Jun 2020 – Jun 2022</div>
+        </div>
+        <div class="exp-company">Santander Bank, N.A. · Boston, MA</div>
+        <ul class="exp-bullets">
+          <li>Capital Management: contributed to the Nov 2020 CCAR resubmission and Board Stress Deck, modeling CET1 ratios and loss rates across stress scenarios</li>
+          <li>PPNR Forecasting: collaborated with business line teams on macro-integrated forecasting ahead of the LIBOR transition</li>
+          <li>Consumer & Business Banking: built forecasts for card initiatives and organized monthly reporting on revenues, expenses, and bookings</li>
+          <li>CRE & Vehicle Finance: compiled new deal profitability reports and built a peer comparison using S&P Market Intelligence data</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="books">
+  <div class="max-w">
+    <div class="section-label">Reading List</div>
+    <div class="section-title">What I'm reading<br>and why it matters.</div>
+    <p class="books-intro">Books that have shaped how I think about business, decisions, and the stories data tells — or doesn't tell.</p>
+    <div class="books-grid">
+      <div class="book-card">
+        <div class="book-tag">Psychology of Money & Markets</div>
+        <div class="book-title">The Psychology of Money</div>
+        <div class="book-author">Morgan Housel</div>
+        <div class="book-note">Your take on how behavioral psychology shapes the way you approach financial analysis — add your own words here.</div>
+      </div>
+      <div class="book-card">
+        <div class="book-tag">Prioritization & Clarity</div>
+        <div class="book-title">The Subtle Art of Not Giving a F*ck</div>
+        <div class="book-author">Mark Manson</div>
+        <div class="book-note">Not the book you'd expect on a finance site — which is kind of the point. Your note on what it changed about how you work.</div>
+      </div>
+      <div class="book-card">
+        <div class="book-tag">Self-Determination</div>
+        <div class="book-title">Educated</div>
+        <div class="book-author">Tara Westover</div>
+        <div class="book-note">A memoir about building a life through relentless curiosity and intellectual drive — your take on why it stuck with you.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="max-w">
+    <div class="section-label">Skills</div>
+    <div class="section-title">The toolkit.</div>
+    <div class="skills-grid">
+      <div class="skill-pill">Excel (Advanced)</div>
+      <div class="skill-pill">Financial Modeling</div>
+      <div class="skill-pill">SaaS Metrics / ARR</div>
+      <div class="skill-pill">Board Reporting</div>
+      <div class="skill-pill">Tableau</div>
+      <div class="skill-pill">Hyperion</div>
+      <div class="skill-pill">Vena</div>
+      <div class="skill-pill">NetSuite</div>
+      <div class="skill-pill">Sage Intacct</div>
+      <div class="skill-pill">ThoughtSpot</div>
+      <div class="skill-pill">Stripe & Payments</div>
+      <div class="skill-pill">PowerPoint</div>
+      <div class="skill-pill">Churn Analysis</div>
+      <div class="skill-pill">Revenue Forecasting</div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="max-w">
+    <div class="section-label">Contact</div>
+    <div class="section-title">Let's talk.</div>
+    <p class="contact-sub">Open to FP&A and finance roles in Boston and beyond. Best reached by email or LinkedIn.</p>
+    <div class="contact-links">
+      <a href="mailto:petermquinn@gmail.com" class="btn btn-primary">petermquinn@gmail.com</a>
+      <a href="https://linkedin.com/in/petermquinn" target="_blank" class="btn btn-outline">LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 Pete Quinn · Built with purpose, not a template.</footer>
+
+<script>
+  const proPoints = [
+    { lat: 42.337, lng: -71.185, title: "Newton, MA", note: "Where it all started. Grew up here, built the foundation." },
+    { lat: 43.073, lng: -89.401, title: "Madison, WI — UW", note: "BBA Finance, Investment & Banking. Four years of cold winters and building things from scratch." },
+    { lat: 42.359, lng: -71.057, title: "Boston, MA — Santander", note: "Four years spanning Capital Management, PPNR Forecasting, and Commercial Banking. Learned to work in a big institution and carve out real impact anyway." },
+    { lat: 42.361, lng: -71.020, title: "Remote — Autura", note: "Post-merger SaaS. Board reporting, ARR models, five business segments, and a lot of methodology built from zero." },
+  ];
+
+  const personalPoints = [
+    { lat: 45.031, lng: -70.313, title: "Sugarloaf Mountain, ME", note: "Where I learned to ski. Still one of my favorite places on earth — there's nothing like that first run of the season." },
+    { lat: 42.338, lng: -71.208, title: "Weeks Field, Newton, MA", note: "Where I learned to play soccer. Spent countless nights here playing until the sun went down — one of those places that just feels like childhood." },
+    { lat: 42.347, lng: -71.097, title: "Fenway Park, Boston, MA", note: "Red Sox Nation, baby. No further explanation needed." },
+    { lat: 41.748, lng: -70.013, title: "Point of Rocks Beach, Brewster, MA", note: "My favorite thinking spot. One of the best sunsets you'll see anywhere — come find out for yourself." },
+    { lat: 41.836, lng: -69.973, title: "Fort Hill Trail, Eastham, MA", note: "One of my favorite head-clearing walks. The kind of place you go when you need to think something through — or stop thinking entirely." },
+  ];
+
+  const map = L.map('map', { zoomControl: true, scrollWheelZoom: false }).setView([42.8, -75], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 13
+  }).addTo(map);
+
+  function makeIcon(color) {
+    return L.divIcon({
+      className: '',
+      html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #0e0f13;box-shadow:0 0 0 2px ${color}40;"></div>`,
+      iconSize: [14, 14], iconAnchor: [7, 7], popupAnchor: [0, -10]
+    });
+  }
+
+  let proLayer = L.layerGroup(), personalLayer = L.layerGroup();
+
+  proPoints.forEach(p => {
+    L.marker([p.lat, p.lng], { icon: makeIcon('#c8a96e') })
+      .bindPopup(`<div class="popup-label pro">Professional</div><div class="popup-title">${p.title}</div><div class="popup-note">${p.note}</div>`)
+      .addTo(proLayer);
+  });
+
+  personalPoints.forEach(p => {
+    L.marker([p.lat, p.lng], { icon: makeIcon('#7eb8a4') })
+      .bindPopup(`<div class="popup-label personal">Personal</div><div class="popup-title">${p.title}</div><div class="popup-note">${p.note}</div>`)
+      .addTo(personalLayer);
+  });
+
+  proLayer.addTo(map);
+
+  function showLayer(type, btn) {
+    document.querySelectorAll('.map-toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (type === 'professional') {
+      map.removeLayer(personalLayer);
+      proLayer.addTo(map);
+      map.setView([42.8, -75], 5);
+    } else {
+      map.removeLayer(proLayer);
+      personalLayer.addTo(map);
+      map.setView([42.8, -71.5], 6);
+    }
+  }
+</script>
+</body>
+</html>
