@@ -35,7 +35,7 @@
   .hero-inner { max-width: 860px; }
   .hero-tag { display: inline-block; font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; border: 1px solid rgba(200,169,110,0.3); padding: 6px 14px; border-radius: 2px; }
   .hero-name-row { display: flex; align-items: center; gap: 28px; margin-bottom: 28px; flex-wrap: wrap; }
-  .avatar { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--accent); flex-shrink: 0; overflow: hidden; filter: grayscale(100%); }
+  .avatar { width: 140px; height: 140px; border-radius: 50%; border: 2px solid var(--accent); flex-shrink: 0; overflow: hidden; filter: grayscale(100%); }
   .avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
   .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 7vw, 5.5rem); line-height: 1.05; font-weight: 900; color: var(--text); margin: 0; }
   .hero h1 span { color: var(--accent); }
@@ -100,10 +100,19 @@
   .exp-bullets li { font-size: 0.9rem; color: var(--muted); padding: 6px 0; padding-left: 16px; position: relative; font-weight: 300; }
   .exp-bullets li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-size: 0.75rem; }
 
-  #books { background: var(--bg); }
+  #tools { background: var(--bg); }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 40px; }
+  .tools-category { display: flex; flex-direction: column; gap: 20px; }
+  .tools-cat-label { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent2); padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .tool-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .tool-item:last-child { border-bottom: none; }
+  .tool-name { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .tool-desc { font-size: 0.85rem; color: var(--muted); font-weight: 300; line-height: 1.6; }
+
+  #books { background: var(--surface); }
   .books-intro { color: var(--muted); font-size: 1.05rem; max-width: 640px; margin-bottom: 48px; font-weight: 300; }
   .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
-  .book-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 28px; transition: border-color 0.2s; }
+  .book-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 28px; transition: border-color 0.2s; }
   .book-card:hover { border-color: rgba(126,184,164,0.4); }
   .book-tag { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent2); margin-bottom: 10px; }
   .book-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--text); margin-bottom: 4px; }
@@ -139,6 +148,7 @@
     <a href="#about">About</a>
     <a href="#journey">Journey</a>
     <a href="#experience">Experience</a>
+    <a href="#tools">Tools</a>
     <a href="#books">Reading</a>
     <a href="#contact">Contact</a>
   </div>
@@ -159,6 +169,7 @@
     <div class="hero-ctas">
       <a href="#experience" class="btn btn-primary">View My Work</a>
       <a href="#contact" class="btn btn-outline">Get In Touch</a>
+      <a href="https://raw.githubusercontent.com/petermquinn/pquinn-site/main/Peter%20Quinn%20Resume%20-%202026.pdf" download class="btn btn-outline">Download Resume</a>
     </div>
   </div>
 </section>
@@ -268,6 +279,60 @@
   </div>
 </section>
 
+<section id="tools">
+  <div class="max-w">
+    <div class="section-label">Tools & Stack</div>
+    <div class="section-title">How I work,<br>not just what I know.</div>
+    <div class="tools-grid">
+
+      <div class="tools-category">
+        <div class="tools-cat-label">Planning & Forecasting</div>
+        <div class="tool-item">
+          <div class="tool-name">Excel</div>
+          <div class="tool-desc">My primary modeling environment. Built everything from ARR waterfalls and churn models to compensation sensitivity analyses and segment-level revenue forecasts.</div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-name">Hyperion</div>
+          <div class="tool-desc">Leveraged for financial consolidation and reporting at Santander across multiple business segments and legal entities.</div>
+        </div>
+      </div>
+
+      <div class="tools-category">
+        <div class="tools-cat-label">Reporting & BI</div>
+        <div class="tool-item">
+          <div class="tool-name">Tableau</div>
+          <div class="tool-desc">Built dashboards to visualize revenue trends, customer churn patterns, and expense variance for executive audiences. Taught myself Tableau through independent projects — including an interactive MBTA transit map. <a href="https://public.tableau.com/app/profile/peter.quinn/vizzes" target="_blank" style="color:var(--accent2);text-decoration:none;font-weight:500;">View on Tableau Public →</a></div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-name">ThoughtSpot</div>
+          <div class="tool-desc">Used at Autura for self-serve analytics — enabling business teams to explore customer and revenue data without always routing through finance.</div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-name">PowerPoint</div>
+          <div class="tool-desc">The last mile of every analysis. Translated complex financial models into board-ready narratives that actually get read and acted on.</div>
+        </div>
+      </div>
+
+      <div class="tools-category">
+        <div class="tools-cat-label">ERP & Finance Ops</div>
+        <div class="tool-item">
+          <div class="tool-name">NetSuite</div>
+          <div class="tool-desc">Primary ERP at Autura — used for GL-level expense analysis, revenue recognition, and pulling actuals for monthly close reporting.</div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-name">Sage Intacct</div>
+          <div class="tool-desc">Used alongside NetSuite post-merger to reconcile financials across legacy business units operating on different systems.</div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-name">Stripe & Payments</div>
+          <div class="tool-desc">Leverage transaction-level reports to analyze customer volume, revenue, and platform fees across our payments platform.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <section id="books">
   <div class="max-w">
     <div class="section-label">Reading List</div>
@@ -307,7 +372,6 @@
       <div class="skill-pill">Board Reporting</div>
       <div class="skill-pill">Tableau</div>
       <div class="skill-pill">Hyperion</div>
-      <div class="skill-pill">Vena</div>
       <div class="skill-pill">NetSuite</div>
       <div class="skill-pill">Sage Intacct</div>
       <div class="skill-pill">ThoughtSpot</div>
